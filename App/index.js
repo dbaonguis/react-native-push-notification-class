@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import 'react-native-gesture-handler';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -6,6 +6,8 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {PeopleList} from './screens/PeopleList';
 import {PersonDetails} from './screens/PersonDetails';
 import {Intro} from './screens/Intro';
+import messaging from '@react-native-firebase/messaging';
+import { Alert } from 'react-native';
 
 const PeopleStack = createStackNavigator();
 const People = () => (
@@ -30,6 +32,17 @@ const IntroScreen = () => (
 
 const Tab = createBottomTabNavigator();
 export default () => {
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage((remoteMessage = {}) => {
+      const notification = remoteMessage.notification || {};
+      if (notification.title) {
+        Alert.alert(notification.title, notification.body);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
   return (
     <NavigationContainer
       linking={{
