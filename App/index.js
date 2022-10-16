@@ -7,7 +7,7 @@ import {PeopleList} from './screens/PeopleList';
 import {PersonDetails} from './screens/PersonDetails';
 import {Intro} from './screens/Intro';
 import messaging from '@react-native-firebase/messaging';
-import { Alert } from 'react-native';
+import {Alert, Linking} from 'react-native';
 
 const PeopleStack = createStackNavigator();
 const People = () => (
@@ -33,10 +33,30 @@ const IntroScreen = () => (
 const Tab = createBottomTabNavigator();
 export default () => {
   useEffect(() => {
+    // listen and receive the message from Push Notification server when the app is in the foreground
     const unsubscribe = messaging().onMessage((remoteMessage = {}) => {
       const notification = remoteMessage.notification || {};
+      const actions = [];
+
+      if (remoteMessage.data && remoteMessage.data.deeplink) {
+        actions.push({
+          text: 'Learn More >',
+          onPress: () => {
+            Linking.canOpenURL(remoteMessage.data.deeplink)
+              .then(supported => {
+                if (supported) {
+                  Linking.openURL(remoteMessage.data.deeplink);
+                } else {
+                  Alert.alert('Error', 'Sorry, something went wrong.');
+                }
+              })
+              .catch(err => Alert.alert('Error', err.message));
+          },
+        });
+      }
+
       if (notification.title) {
-        Alert.alert(notification.title, notification.body);
+        Alert.alert(notification.title, notification.body, actions);
       }
     });
 
