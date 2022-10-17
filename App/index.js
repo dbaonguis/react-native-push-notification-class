@@ -30,6 +30,18 @@ const IntroScreen = () => (
   </ProfileStack.Navigator>
 );
 
+const openLink = link => {
+  Linking.canOpenURL(link)
+    .then(supported => {
+      if (supported) {
+        Linking.openURL(link);
+      } else {
+        Alert.alert('Error', 'Sorry, something went wrong.');
+      }
+    })
+    .catch(err => Alert.alert('Error', err.message));
+};
+
 const Tab = createBottomTabNavigator();
 export default () => {
   useEffect(() => {
@@ -41,17 +53,7 @@ export default () => {
       if (remoteMessage.data && remoteMessage.data.deeplink) {
         actions.push({
           text: 'Learn More >',
-          onPress: () => {
-            Linking.canOpenURL(remoteMessage.data.deeplink)
-              .then(supported => {
-                if (supported) {
-                  Linking.openURL(remoteMessage.data.deeplink);
-                } else {
-                  Alert.alert('Error', 'Sorry, something went wrong.');
-                }
-              })
-              .catch(err => Alert.alert('Error', err.message));
-          },
+          onPress: () => openLink(remoteMessage.data.deeplink),
         });
       }
 
@@ -60,6 +62,22 @@ export default () => {
       }
     });
 
+    return unsubscribe;
+  }, []);
+
+  // handle push notifications when the app is in (1) quit state, and (2) background state
+  useEffect(() => {
+    const onNotificationOpen = (remoteNotification = {}) => {
+      if (remoteNotification.data && remoteNotification.data.deeplink) {
+        openLink(remoteNotification.data.deeplink);
+      }
+    };
+
+    // quit state
+    messaging().getInitialNotification(onNotificationOpen);
+
+    // background state
+    const unsubscribe = messaging().onNotificationOpenedApp(onNotificationOpen);
     return unsubscribe;
   }, []);
 
