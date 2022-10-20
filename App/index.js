@@ -5,6 +5,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {PeopleList} from './screens/PeopleList';
 import {PersonDetails} from './screens/PersonDetails';
+import {Settings} from './screens/Settings';
 import {Intro} from './screens/Intro';
 import messaging from '@react-native-firebase/messaging';
 import {Alert, Linking} from 'react-native';
@@ -28,6 +29,13 @@ const IntroScreen = () => (
   <ProfileStack.Navigator>
     <ProfileStack.Screen name="Intro" component={Intro} />
   </ProfileStack.Navigator>
+);
+
+const SettingsStack = createStackNavigator();
+const SettingsScreen = () => (
+  <SettingsStack.Navigator>
+    <SettingsStack.Screen name="Settings" component={Settings} />
+  </SettingsStack.Navigator>
 );
 
 const openLink = link => {
@@ -111,6 +119,11 @@ export default () => {
           name="PeopleTab"
           component={People}
           options={{title: 'People'}}
+        />
+        <Tab.Screen
+          name="SettingsTab"
+          component={SettingsScreen}
+          options={{title: 'Settings'}}
         />
       </Tab.Navigator>
     </NavigationContainer>
